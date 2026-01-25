@@ -8,6 +8,22 @@ const event: Event = {
     logger.info(`Bot conectado como ${client.user?.tag}!`);
     logger.info(`Bot está em ${client.guilds.cache.size} servidores`);
     
+    // Verificar se eventos importantes estão registrados
+    const eventNames = client.eventNames();
+    if (eventNames.includes('guildMemberAdd')) {
+      logger.info('✅ Evento guildMemberAdd está registrado');
+    } else {
+      logger.warn('⚠️ Evento guildMemberAdd NÃO está registrado! Verifique se o arquivo existe e foi carregado.');
+    }
+    
+    // Verificar intents
+    const intents = client.options.intents;
+    if (intents?.has('GuildMembers')) {
+      logger.info('✅ Intent GuildMembers está habilitada');
+    } else {
+      logger.warn('⚠️ Intent GuildMembers NÃO está habilitada! O evento guildMemberAdd não funcionará.');
+    }
+    
     // Definir status do bot
     client.user?.setActivity('Desenvolvendo features incríveis!', { type: 'WATCHING' });
   },
