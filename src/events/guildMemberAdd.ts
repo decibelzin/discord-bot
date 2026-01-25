@@ -46,23 +46,34 @@ const event: Event<'guildMemberAdd'> = {
           
           logger.info(`Total de canais de texto encontrados: ${textChannels.size}`);
           
-          const logChannels = textChannels.filter(
-            (channel) => {
-              const name = channel.name.toLowerCase();
-              return name.includes('log') || name.includes('entrada') || name.includes('welcome');
-            }
+          // Procurar primeiro pelo canal exato "joined"
+          const joinedChannel = textChannels.find(
+            (channel) => channel.name.toLowerCase() === 'joined'
           );
           
-          logger.info(`Canais com 'log', 'entrada' ou 'welcome' no nome: ${logChannels.size}`);
-          
-          if (logChannels.size > 0) {
-            logChannel = logChannels.first() as TextChannel;
-            logger.info(`Canal de log automático encontrado: ${logChannel.name} (${logChannel.id})`);
+          if (joinedChannel) {
+            logChannel = joinedChannel as TextChannel;
+            logger.info(`✅ Canal de log de entrada encontrado: ${logChannel.name} (${logChannel.id})`);
           } else {
-            logger.warn('Nenhum canal de log encontrado automaticamente. Listando todos os canais de texto:');
-            textChannels.forEach((channel) => {
-              logger.info(`  - ${channel.name} (${channel.id})`);
-            });
+            // Fallback: procurar por outros nomes comuns
+            const logChannels = textChannels.filter(
+              (channel) => {
+                const name = channel.name.toLowerCase();
+                return name.includes('log') || name.includes('entrada') || name.includes('welcome');
+              }
+            );
+            
+            logger.info(`Canais com 'log', 'entrada' ou 'welcome' no nome: ${logChannels.size}`);
+            
+            if (logChannels.size > 0) {
+              logChannel = logChannels.first() as TextChannel;
+              logger.info(`Canal de log automático encontrado: ${logChannel.name} (${logChannel.id})`);
+            } else {
+              logger.warn('Nenhum canal de log encontrado automaticamente. Listando todos os canais de texto:');
+              textChannels.forEach((channel) => {
+                logger.info(`  - ${channel.name} (${channel.id})`);
+              });
+            }
           }
         } catch (error) {
           logger.error('Erro ao procurar canal de log automático:', error as Error);
@@ -93,7 +104,7 @@ const event: Event<'guildMemberAdd'> = {
           }
         }
       } else {
-        logger.warn('⚠️ Nenhum canal de log disponível. Configure LOG_CHANNEL_ID no .env ou crie um canal com "log", "entrada" ou "welcome" no nome.');
+        logger.warn('⚠️ Nenhum canal de log disponível. Configure LOG_CHANNEL_ID no .env ou crie um canal chamado "joined" para logs de entrada.');
       }
     } catch (error) {
       logger.error('Erro no evento guildMemberAdd:', error as Error);
