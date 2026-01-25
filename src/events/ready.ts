@@ -16,12 +16,18 @@ const event: Event = {
       logger.warn('⚠️ Evento guildMemberAdd NÃO está registrado! Verifique se o arquivo existe e foi carregado.');
     }
     
+    if (eventNames.includes('guildMemberRemove')) {
+      logger.info('✅ Evento guildMemberRemove está registrado');
+    } else {
+      logger.warn('⚠️ Evento guildMemberRemove NÃO está registrado! Verifique se o arquivo existe e foi carregado.');
+    }
+    
     // Verificar intents
     const intents = client.options.intents;
     if (intents?.has('GuildMembers')) {
       logger.info('✅ Intent GuildMembers está habilitada');
     } else {
-      logger.warn('⚠️ Intent GuildMembers NÃO está habilitada! O evento guildMemberAdd não funcionará.');
+      logger.warn('⚠️ Intent GuildMembers NÃO está habilitada! Os eventos guildMemberAdd e guildMemberRemove não funcionarão.');
     }
     
     // Definir status do bot
