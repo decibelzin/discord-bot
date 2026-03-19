@@ -7,6 +7,27 @@ import { MESSAGES, TIMEOUTS } from '../constants';
 
 type VCInteraction = StringSelectMenuInteraction | ButtonInteraction;
 
+async function deferEphemeralIfNeeded(interaction: VCInteraction): Promise<void> {
+  if (interaction.deferred || interaction.replied) return;
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+}
+
+async function safeRespondEphemeral(interaction: VCInteraction, content: string): Promise<void> {
+  try {
+    if (interaction.deferred) {
+      await interaction.editReply({ content });
+    } else if (interaction.replied) {
+      await interaction.followUp({ content, flags: MessageFlags.Ephemeral });
+    } else {
+      await interaction.reply({ content, flags: MessageFlags.Ephemeral });
+    }
+  } catch {
+    // If the interaction expired between the defer and this response,
+    // Discord will throw "Unknown interaction" (10062). At this point,
+    // there's nothing useful we can do for the user.
+  }
+}
+
 function getSelectedValue(interaction: VCInteraction): string {
   return interaction.isButton() ? interaction.customId : interaction.values[0];
 }
@@ -248,6 +269,8 @@ async function showRenameModal(interaction: VCInteraction, voiceChannel: VoiceCh
 
 async function lockChannel(interaction: VCInteraction, voiceChannel: VoiceChannel): Promise<void> {
   try {
+    await deferEphemeralIfNeeded(interaction);
+
     const guild = interaction.guild!;
     const everyoneRole = guild.roles.everyone;
     
@@ -302,21 +325,23 @@ async function lockChannel(interaction: VCInteraction, voiceChannel: VoiceChanne
     
     await voiceChannel.permissionOverwrites.set(newOverwrites);
     
-    await interaction.reply({
-      content: '🔒 Canal trancado! Apenas você, admins e usuários com permissão explícita podem entrar.\n💡 *Dica: Use "Permitir usuário" para dar acesso a alguém.*',
-      flags: MessageFlags.Ephemeral,
-    });
+    await safeRespondEphemeral(
+      interaction,
+      '🔒 Canal trancado! Apenas você, admins e usuários com permissão explícita podem entrar.\n💡 *Dica: Use "Permitir usuário" para dar acesso a alguém.*'
+    );
   } catch (error) {
     logger.error('Erro ao trancar canal:', error as Error);
-    await interaction.reply({
-      content: '❌ Erro ao trancar o canal. Verifique as permissões do bot.',
-      flags: MessageFlags.Ephemeral,
-    });
+    await safeRespondEphemeral(
+      interaction,
+      '❌ Erro ao trancar o canal. Verifique as permissões do bot.'
+    );
   }
 }
 
 async function unlockChannel(interaction: VCInteraction, voiceChannel: VoiceChannel): Promise<void> {
   try {
+    await deferEphemeralIfNeeded(interaction);
+
     const newOverwrites: any[] = [];
     
     for (const [id, overwrite] of voiceChannel.permissionOverwrites.cache) {
@@ -344,22 +369,21 @@ async function unlockChannel(interaction: VCInteraction, voiceChannel: VoiceChan
     
     await voiceChannel.permissionOverwrites.set(newOverwrites);
     
-    await interaction.reply({
-      content: '🔓 Canal destrancado! Todos podem entrar novamente.',
-      flags: MessageFlags.Ephemeral,
-    });
+    await safeRespondEphemeral(interaction, '🔓 Canal destrancado! Todos podem entrar novamente.');
   } catch (error) {
     logger.error('Erro ao destrancar canal:', error as Error);
-    await interaction.reply({
-      content: '❌ Erro ao destrancar o canal. Verifique as permissões do bot.',
-      flags: MessageFlags.Ephemeral,
-    });
+    await safeRespondEphemeral(
+      interaction,
+      '❌ Erro ao destrancar o canal. Verifique as permissões do bot.'
+    );
   }
 }
 
 // Esconder canal
 async function hideChannel(interaction: VCInteraction, voiceChannel: VoiceChannel): Promise<void> {
   try {
+    await deferEphemeralIfNeeded(interaction);
+
     const guild = interaction.guild!;
     const everyoneRole = guild.roles.everyone;
     
@@ -414,21 +438,23 @@ async function hideChannel(interaction: VCInteraction, voiceChannel: VoiceChanne
     
     await voiceChannel.permissionOverwrites.set(newOverwrites);
     
-    await interaction.reply({
-      content: '👁️ Canal escondido! Apenas você, admins e usuários com permissão podem ver.',
-      flags: MessageFlags.Ephemeral,
-    });
+    await safeRespondEphemeral(
+      interaction,
+      '👁️ Canal escondido! Apenas você, admins e usuários com permissão podem ver.'
+    );
   } catch (error) {
     logger.error('Erro ao esconder canal:', error as Error);
-    await interaction.reply({
-      content: '❌ Erro ao esconder o canal. Verifique as permissões do bot.',
-      flags: MessageFlags.Ephemeral,
-    });
+    await safeRespondEphemeral(
+      interaction,
+      '❌ Erro ao esconder o canal. Verifique as permissões do bot.'
+    );
   }
 }
 
 async function showChannel(interaction: VCInteraction, voiceChannel: VoiceChannel): Promise<void> {
   try {
+    await deferEphemeralIfNeeded(interaction);
+
     const newOverwrites: any[] = [];
     
     for (const [id, overwrite] of voiceChannel.permissionOverwrites.cache) {
@@ -456,16 +482,16 @@ async function showChannel(interaction: VCInteraction, voiceChannel: VoiceChanne
     
     await voiceChannel.permissionOverwrites.set(newOverwrites);
     
-    await interaction.reply({
-      content: '👁️‍🗨️ Canal visível! Todos podem ver novamente.',
-      flags: MessageFlags.Ephemeral,
-    });
+    await safeRespondEphemeral(
+      interaction,
+      '👁️‍🗨️ Canal visível! Todos podem ver novamente.'
+    );
   } catch (error) {
     logger.error('Erro ao mostrar canal:', error as Error);
-    await interaction.reply({
-      content: '❌ Erro ao mostrar o canal. Verifique as permissões do bot.',
-      flags: MessageFlags.Ephemeral,
-    });
+    await safeRespondEphemeral(
+      interaction,
+      '❌ Erro ao mostrar o canal. Verifique as permissões do bot.'
+    );
   }
 }
 
@@ -614,6 +640,8 @@ async function showRegionMenu(interaction: VCInteraction, _voiceChannel: VoiceCh
 
 async function disableVideo(interaction: VCInteraction, voiceChannel: VoiceChannel): Promise<void> {
   try {
+    await deferEphemeralIfNeeded(interaction);
+
     const guild = interaction.guild!;
     const everyoneRole = guild.roles.everyone;
     const newOverwrites: any[] = [];
@@ -659,21 +687,20 @@ async function disableVideo(interaction: VCInteraction, voiceChannel: VoiceChann
     
     await voiceChannel.permissionOverwrites.set(newOverwrites);
     
-    await interaction.reply({
-      content: '📹🖥️ Câmera e compartilhamento de tela desativados para todos!\n⚠️ *Nota: Admins ainda podem usar. O Discord controla ambos com a mesma permissão.*',
-      flags: MessageFlags.Ephemeral,
-    });
+    await safeRespondEphemeral(
+      interaction,
+      '📹🖥️ Câmera e compartilhamento de tela desativados para todos!\n⚠️ *Nota: Admins ainda podem usar. O Discord controla ambos com a mesma permissão.*'
+    );
   } catch (error) {
     logger.error('Erro ao desativar vídeo:', error as Error);
-    await interaction.reply({
-      content: '❌ Erro ao desativar vídeo.',
-      flags: MessageFlags.Ephemeral,
-    });
+    await safeRespondEphemeral(interaction, '❌ Erro ao desativar vídeo.');
   }
 }
 
 async function enableVideo(interaction: VCInteraction, voiceChannel: VoiceChannel): Promise<void> {
   try {
+    await deferEphemeralIfNeeded(interaction);
+
     const newOverwrites: any[] = [];
     
     for (const [id, overwrite] of voiceChannel.permissionOverwrites.cache) {
@@ -698,16 +725,13 @@ async function enableVideo(interaction: VCInteraction, voiceChannel: VoiceChanne
     
     await voiceChannel.permissionOverwrites.set(newOverwrites);
     
-    await interaction.reply({
-      content: '📹🖥️ Câmera e compartilhamento de tela ativados!\n⚠️ *Nota: O Discord controla ambos com a mesma permissão.*',
-      flags: MessageFlags.Ephemeral,
-    });
+    await safeRespondEphemeral(
+      interaction,
+      '📹🖥️ Câmera e compartilhamento de tela ativados!\n⚠️ *Nota: O Discord controla ambos com a mesma permissão.*'
+    );
   } catch (error) {
     logger.error('Erro ao ativar vídeo:', error as Error);
-    await interaction.reply({
-      content: '❌ Erro ao ativar vídeo.',
-      flags: MessageFlags.Ephemeral,
-    });
+    await safeRespondEphemeral(interaction, '❌ Erro ao ativar vídeo.');
   }
 }
 
@@ -726,6 +750,8 @@ async function showUserLimitModal(interaction: VCInteraction, voiceChannel: Voic
 
 async function resetPermissions(interaction: VCInteraction, voiceChannel: VoiceChannel): Promise<void> {
   try {
+    await deferEphemeralIfNeeded(interaction);
+
     const guild = interaction.guild!;
     const everyoneRole = guild.roles.everyone;
     const newOverwrites: any[] = [];
@@ -766,15 +792,9 @@ async function resetPermissions(interaction: VCInteraction, voiceChannel: VoiceC
                     `${removedUsersCount > 0 ? `👤 ${removedUsersCount} usuário(s) removido(s)\n` : ''}` +
                     `${removedRolesCount > 0 ? `🎭 ${removedRolesCount} cargo(s) resetado(s)` : ''}`;
     
-    await interaction.reply({
-      content: message.trim(),
-      flags: MessageFlags.Ephemeral,
-    });
+    await safeRespondEphemeral(interaction, message.trim());
   } catch (error) {
     logger.error('Erro ao resetar permissões:', error as Error);
-    await interaction.reply({
-      content: '❌ Erro ao resetar permissões.',
-      flags: MessageFlags.Ephemeral,
-    });
+    await safeRespondEphemeral(interaction, '❌ Erro ao resetar permissões.');
   }
 }
