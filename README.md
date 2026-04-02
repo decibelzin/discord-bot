@@ -62,6 +62,7 @@ DISCORD_TOKEN=seu_token_aqui
 CLIENT_ID=seu_client_id_aqui
 GUILD_ID=seu_guild_id_aqui_opcional
 NODE_ENV=production
+# Last Meadow: em VPS use LAST_MEADOW_HEADLESS=1 (sem janela). No PC omita para ver o browser.
 ```
 
 ## ⚙️ Configuração

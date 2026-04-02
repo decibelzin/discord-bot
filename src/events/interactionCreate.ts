@@ -1,5 +1,7 @@
 import { Event } from '../types';
 import { logger } from '../utils/logger';
+import { handleLastMeadowModalSubmit } from '../features/last-meadow/lastMeadowModalHandler';
+import { LAST_MEADOW_MODAL_CUSTOM_ID } from '../features/last-meadow/constants';
 import { MessageFlags, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, ChannelType, VoiceChannel, UserSelectMenuBuilder, type MessageActionRowComponentBuilder, ContainerBuilder, TextDisplayBuilder, Role, type ClientEvents, type Interaction } from 'discord.js';
 import { isDynamicChannel, getChannelOwner } from './voiceStateUpdate';
 import { handleMainSettingsMenu } from '../handlers/vcSettingsHandler';
@@ -314,6 +316,11 @@ const event: Event<'interactionCreate'> = {
     }
 
     if (interaction.isModalSubmit()) {
+      if (interaction.customId === LAST_MEADOW_MODAL_CUSTOM_ID) {
+        await handleLastMeadowModalSubmit(interaction);
+        return;
+      }
+
       const customId = interaction.customId;
       
       if (customId.startsWith(CUSTOM_IDS.PREFIXES.MODAL_STATUS)) {

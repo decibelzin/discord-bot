@@ -2,9 +2,9 @@
  * Service for managing dynamic voice channels
  */
 
-import { VoiceChannel, Guild, GuildMember, Snowflake, ChannelType, PermissionFlagsBits } from 'discord.js';
+import { VoiceChannel, Guild, Snowflake, ChannelType, PermissionFlagsBits } from 'discord.js';
 import { logger } from '../utils/logger';
-import { OWNER_PERMISSIONS, TIMEOUTS, MESSAGES } from '../constants';
+import { OWNER_PERMISSIONS, TIMEOUTS } from '../constants';
 import { DynamicChannelData, CreateDynamicChannelOptions, DynamicChannelOperationResult } from '../types';
 
 /**
@@ -147,7 +147,9 @@ export class DynamicChannelService {
       try {
         await member.voice.setChannel(newChannel);
       } catch (moveError) {
-        logger.warn(`Não foi possível mover ${member.user.tag} para o novo canal:`, moveError as Error);
+        logger.warn(
+          `Não foi possível mover ${member.user.tag} para o novo canal: ${moveError instanceof Error ? moveError.message : String(moveError)}`,
+        );
       }
       
       logger.info(`Canal dinâmico criado: ${newChannel.name} (${newChannel.id}) para ${member.user.tag}`);

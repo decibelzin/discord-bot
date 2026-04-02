@@ -137,7 +137,7 @@ export function setChannelOwner(channelId: string, ownerId: string): void {
   }
 }
 
-const event: Event = {
+const event: Event<'voiceStateUpdate'> = {
   name: 'voiceStateUpdate',
   execute: async (oldState: VoiceState, newState: VoiceState) => {
     try {
@@ -196,7 +196,9 @@ const event: Event = {
                   body: { status: userSettings.status },
                 });
               } catch (statusError) {
-                logger.debug('Status não aplicado (pode não estar disponível):', statusError as Error);
+                logger.debug(
+                  `Status não aplicado (pode não estar disponível): ${statusError instanceof Error ? statusError.message : String(statusError)}`,
+                );
               }
             }
 
@@ -205,7 +207,9 @@ const event: Event = {
                 const { protectionService } = await import('../services');
                 await protectionService.enableProtection(newDynamicChannel as VoiceChannel, member.id);
               } catch (protectionError) {
-                logger.warn('Não foi possível aplicar proteção ao canal:', protectionError as Error);
+                logger.warn(
+                  `Não foi possível aplicar proteção ao canal: ${protectionError instanceof Error ? protectionError.message : String(protectionError)}`,
+                );
               }
             }
 

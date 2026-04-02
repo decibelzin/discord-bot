@@ -1,7 +1,9 @@
-export * from './events';
+export * from "./bot";
 
-export * from './dynamicChannel';
+export * from "./events";
 
-export * from './permissions';
+export * from "./dynamicChannel";
 
-export * from './validation';
+export * from "./permissions";
+
+export * from "./validation";

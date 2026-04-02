@@ -1,10 +1,11 @@
+import { ActivityType, Client, GatewayIntentBits } from 'discord.js';
 import { Event } from '../types';
 import { logger } from '../utils/logger';
 
-const event: Event = {
+const event: Event<'clientReady'> = {
   name: 'clientReady',
   once: true,
-  execute: (client) => {
+  execute: (client: Client<true>) => {
     logger.info(`Bot conectado como ${client.user?.tag}!`);
     logger.info(`Bot está em ${client.guilds.cache.size} servidores`);
     
@@ -24,14 +25,14 @@ const event: Event = {
     
     // Verificar intents
     const intents = client.options.intents;
-    if (intents?.has('GuildMembers')) {
+    if (intents?.has(GatewayIntentBits.GuildMembers)) {
       logger.info('✅ Intent GuildMembers está habilitada');
     } else {
       logger.warn('⚠️ Intent GuildMembers NÃO está habilitada! Os eventos guildMemberAdd e guildMemberRemove não funcionarão.');
     }
     
     // Definir status do bot
-    client.user?.setActivity('Desenvolvendo features incríveis!', { type: 'WATCHING' });
+    client.user?.setActivity('Desenvolvendo features incríveis!', { type: ActivityType.Watching });
   },
 };
 

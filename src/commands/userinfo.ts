@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
+import { ChatInputCommandInteraction } from 'discord.js';
 import { Command } from '../types';
 
 const command: Command = {
@@ -20,7 +20,7 @@ const command: Command = {
       color: 0x0099ff,
       title: `Informações de ${user.username}`,
       thumbnail: {
-        url: user.displayAvatarURL({ dynamic: true }),
+        url: user.displayAvatarURL({ size: 256 }),
       },
       fields: [
         {

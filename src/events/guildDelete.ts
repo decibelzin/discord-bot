@@ -2,7 +2,7 @@ import { Event } from '../types';
 import { logger } from '../utils/logger';
 import { Guild } from 'discord.js';
 
-const event: Event = {
+const event: Event<'guildDelete'> = {
   name: 'guildDelete',
   execute: async (guild: Guild) => {
     logger.info(`Bot removido do servidor: ${guild.name} (${guild.id})`);

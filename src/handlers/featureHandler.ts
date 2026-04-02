@@ -1,13 +1,9 @@
 import { readdirSync } from 'fs';
 import { join } from 'path';
-import { ExtendedClient } from '../types';
-import { logger } from '../utils/logger';
+import { BotFeatureModule, ExtendedClient } from "../types";
+import { logger } from "../utils/logger";
 
-export interface Feature {
-  name: string;
-  initialize: (client: ExtendedClient) => Promise<void> | void;
-  [key: string]: any;
-}
+export type Feature = BotFeatureModule & Record<string, unknown>;
 
 export async function loadFeatures(client: ExtendedClient): Promise<void> {
   client.features = new Map();

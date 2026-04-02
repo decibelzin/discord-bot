@@ -7,13 +7,14 @@ export async function loadEvents(client: ExtendedClient): Promise<void> {
   const eventsPath = join(__dirname, '../events');
   
   try {
-    const eventFiles = readdirSync(eventsPath).filter(file => 
-      file.endsWith('.ts') || file.endsWith('.js')
+    const eventFiles = readdirSync(eventsPath).filter(
+      (file) =>
+        !file.endsWith(".d.ts") && (file.endsWith(".js") || file.endsWith(".ts")),
     );
 
     for (const file of eventFiles) {
       const filePath = join(eventsPath, file);
-      const event: Event = await import(filePath).then(m => m.default || m);
+      const event = (await import(filePath).then((m) => m.default || m)) as Event;
       
       if ('name' in event && 'execute' in event) {
         if (event.once) {

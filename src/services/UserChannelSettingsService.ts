@@ -1,7 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import type { Snowflake } from 'discord.js';
 import { logger } from '../utils/logger';
-import { UserChannelSettings, Snowflake } from '../types';
+import { UserChannelSettings } from '../types';
 
 const SETTINGS_FILE = path.join(process.cwd(), 'data', 'userChannelSettings.json');
 

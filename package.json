@@ -10,7 +10,8 @@
     "start": "node dist/index.js",
     "start:watch": "npm run build:watch & npm run start",
     "clean": "rimraf dist",
-    "prebuild": "npm run clean"
+    "prebuild": "npm run clean",
+    "postinstall": "playwright install chromium"
   },
   "keywords": [
     "discord",
@@ -22,6 +23,7 @@
   "dependencies": {
     "discord.js": "^14.19.3",
     "dotenv": "^16.3.1",
+    "playwright": "^1.59.1",
     "vibesync": "^1.0.6"
   },
   "devDependencies": {

@@ -7,7 +7,7 @@ import { logger } from '../../utils/logger';
 const feature: Feature = {
   name: 'example',
   
-  initialize: async (client: ExtendedClient) => {
+  initialize: async (_client: ExtendedClient) => {
     logger.info('Feature de exemplo inicializada!');
     
     // Aqui você pode adicionar listeners específicos desta feature
@@ -18,7 +18,7 @@ const feature: Feature = {
   },
   
   // Métodos específicos da feature
-  handleMessage: (message: any) => {
+  handleMessage: (_message: unknown) => {
     // Lógica específica da feature
   },
 };
